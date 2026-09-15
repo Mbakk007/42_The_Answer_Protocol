@@ -1,0 +1,143 @@
+{
+  "locations": {
+    "loc.frostmere_gate": {
+      "name": "Frostmere Gate",
+      "description": "A weathered stone arch marks the entrance to the settlement. Snow drifts against the pillars.",
+      "exits": { "north": "loc.mead_hall", "west": "loc.frozen_well", "east": "loc.trading_post" }
+    },
+    "loc.mead_hall": {
+      "name": "The Mead Hall",
+      "description": "Long benches line a smoky room. A fire pit crackles at the centre.",
+      "exits": { "south": "loc.frostmere_gate", "north": "loc.old_shrine" },
+      "npcs": ["npc.innkeeper"]
+    },
+    "loc.old_shrine": {
+      "name": "Old Shrine",
+      "description": "A moss-covered altar stands in a hollow. The air is unnaturally still.",
+      "exits": { "south": "loc.mead_hall" },
+      "npcs": ["npc.shrine_keeper"]
+    },
+    "loc.frozen_well": {
+      "name": "Frozen Well",
+      "description": "A stone well, its rope stiff with ice.",
+      "exits": { "east": "loc.frostmere_gate", "south": "loc.icy_creek" },
+      "items": ["item.iron_bucket"]
+    },
+    "loc.trading_post": {
+      "name": "Trading Post",
+      "description": "Crates and furs are stacked under a sagging awning.",
+      "exits": { "west": "loc.frostmere_gate", "south": "loc.forge" },
+      "npcs": ["npc.trader"]
+    },
+    "loc.icy_creek": {
+      "name": "Icy Creek",
+      "description": "Meltwater runs fast over black stones. Something green grows at the edge.",
+      "exits": { "north": "loc.frozen_well", "east": "loc.pinewood" },
+      "items": ["item.frost_herbs"]
+    },
+    "loc.forge": {
+      "name": "The Forge",
+      "description": "Heat pours from the coals. Tools hang in neat rows.",
+      "exits": { "north": "loc.trading_post", "west": "loc.pinewood" },
+      "items": ["item.anvil"],
+      "npcs": ["npc.forge_wraith"]
+    },
+    "loc.pinewood": {
+      "name": "Pinewood",
+      "description": "Dense pines close overhead. Tracks cross the snow.",
+      "exits": { "west": "loc.icy_creek", "east": "loc.forge" },
+      "npcs": ["npc.snow_wolf"]
+    }
+  },
+
+  "items": {
+    "item.iron_bucket": {
+      "name": "Iron Bucket",
+      "description": "A dented bucket, still sturdy.",
+      "obtainable": true
+    },
+    "item.frost_herbs": {
+      "name": "Frost Herbs",
+      "description": "Pale leaves that keep their colour in the cold.",
+      "obtainable": true
+    },
+    "item.anvil": {
+      "name": "Anvil",
+      "description": "Far too heavy to move.",
+      "obtainable": false
+    },
+    "item.wolf_pelt": {
+      "name": "Wolf Pelt",
+      "description": "Thick grey fur, still warm.",
+      "obtainable": true
+    },
+    "item.ember_shard": {
+      "name": "Ember Shard",
+      "description": "A fragment of slag that never cools.",
+      "obtainable": true
+    }
+  },
+
+  "npcs": {
+    "npc.innkeeper": {
+      "name": "Innkeeper",
+      "description": "A broad woman polishing a horn cup.",
+      "role": "dialogue",
+      "dialogue": ["Cold out there.", "Sit by the fire if you like."],
+      "hp": 20
+    },
+    "npc.trader": {
+      "name": "Fur Trader",
+      "description": "A wiry man counting pelts under his breath.",
+      "role": "dialogue",
+      "dialogue": ["Good pelts fetch a good price.", "The wolf out east has ruined my stock."],
+      "hp": 20
+    },
+    "npc.shrine_keeper": {
+      "name": "Shrine Keeper",
+      "description": "An old man in frost-stiffened robes.",
+      "role": "quest",
+      "dialogue": ["The shrine needs tending.", "Have you been to the creek?"],
+      "hp": 20,
+      "quests": ["quest.herbs", "quest.wolf"]
+    },
+    "npc.snow_wolf": {
+      "name": "Snow Wolf",
+      "description": "Lean and grey, watching from the treeline.",
+      "role": "enemy",
+      "dialogue": [],
+      "hp": 40,
+      "damage": 8,
+      "drops": ["item.wolf_pelt"]
+    },
+    "npc.forge_wraith": {
+      "name": "Forge Wraith",
+      "description": "A shape of heat-haze and ash that will not leave the coals.",
+      "role": "enemy",
+      "dialogue": [],
+      "hp": 60,
+      "damage": 12,
+      "drops": ["item.ember_shard"]
+    }
+  },
+
+  "quests": {
+    "quest.herbs": {
+      "name": "Herbs for the Shrine",
+      "description": "Bring Frost Herbs to the Shrine Keeper.",
+      "giver": "npc.shrine_keeper",
+      "type": "fetch",
+      "target": "item.frost_herbs",
+      "reward_hp": 20
+    },
+    "quest.wolf": {
+      "name": "The Snow Wolf",
+      "description": "Kill the snow wolf in Pinewood and return with its pelt.",
+      "giver": "npc.shrine_keeper",
+      "type": "kill",
+      "target": "npc.snow_wolf",
+      "proof": "item.wolf_pelt",
+      "reward_hp": 30
+    }
+  }
+}

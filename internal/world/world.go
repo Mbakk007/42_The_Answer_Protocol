@@ -6,11 +6,12 @@ import (
 )
 
 type Location struct {
-	Name 		string					`json:"name"`
-	Description string					`json:"description"`
-	Exits		map[string]string		`json:"exits"`
-	Items		[]string				`json:"items"`
-	NPCs		[]string				`json:"npcs"`
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Exits       map[string]string `json:"exits"`
+	Items       []string          `json:"items"`
+	NPCs        []string          `json:"npcs"`
 }
 
 type Item struct {
@@ -55,8 +56,19 @@ func Load(path string) (*World, error) {
 	}
 
 	var w World
-	if err := json.Unmarshal(data, &w); err != nil { // &w so it can be filled in
+	if err := json.Unmarshal(data, &w); err != nil {
 		return nil, err
 	}
+
+	for id, loc := range w.Locations {
+		loc.ID = id
+		if loc.Items == nil {
+			loc.Items = []string{}
+		}
+		if loc.NPCs == nil {
+			loc.NPCs = []string{}
+		}
+	}
+
 	return &w, nil
 }

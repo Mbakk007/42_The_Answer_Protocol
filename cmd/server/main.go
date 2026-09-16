@@ -14,7 +14,7 @@ func main() {
 	}
 	log.Printf("loaded %d rooms, %d items, %d npcs, %d quests",
 		len(w.Locations), len(w.Items), len(w.NPCs), len(w.Quests))
-
+	gameWorld = w
 	ln, err := net.Listen("tcp", ":4040") // bind tcp socket to port 4040, fail if port is taken
 	if err != nil {
 		log.Fatal(err)

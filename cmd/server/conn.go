@@ -7,11 +7,22 @@ import (
 	"net"
 	"strings"
 	"sync"
+
+	"tap/internal/world"
 )
 
+// TODO: move player + clients + mu into internal/game
+
+type player struct {
+	name string // "" until CONNECT
+	room string // current location id
+	hp   int
+}
+
 var (
-	mu      sync.Mutex
-	clients = make(map[net.Conn]string)
+	mu        sync.Mutex
+	clients   = make(map[net.Conn]*player)
+	gameWorld *world.World
 )
 
 func handleConn(conn net.Conn) {
@@ -20,12 +31,18 @@ func handleConn(conn net.Conn) {
 	log.Printf("connected: %s", conn.RemoteAddr()) // print clients ip and port
 
 	mu.Lock()
-	clients[conn] = ""
+	clients[conn] = &player{room: "loc.frostmere_gate", hp: 100} // TODO: starting room still hardcoded fix later
 	mu.Unlock()
+
+	fmt.Fprintf(conn, "OK hello proto=1\n") // RFC 3.2
 
 	sc := bufio.NewScanner(conn)
 	for sc.Scan() {
-		parts := strings.SplitN(sc.Text(), " ", 2)
+		line := strings.TrimSpace(sc.Text()) // also strips \r from CRLF clients
+		if line == "" {
+			continue // ignore empty lines
+		}
+		parts := strings.SplitN(line, " ", 2)
 		verb := strings.ToUpper(parts[0])
 		rest := ""
 		if len(parts) > 1 {
@@ -64,7 +81,7 @@ func handleConn(conn net.Conn) {
 		case "QUIT":
 			handleQuit(conn, rest)
 		default:
-			fmt.Fprintf(conn, "ERR: unknown command\n")
+			fmt.Fprintf(conn, "ERR 400 UNKNOWN_COMMAND\n")
 		}
 	}
 	if err := sc.Err(); err != nil {

@@ -240,8 +240,64 @@ func authPlayer(conn net.Conn) *player {
 	return p
 }
 
-func handleTalk(conn net.Conn, rest string)      { fmt.Fprintf(conn, "ERR: not implemented\n") }
-func handleAttack(conn net.Conn, rest string)    { fmt.Fprintf(conn, "ERR: not implemented\n") }
+
+func resolveNPC(s string) string {
+	if _, ok := gameWorld.NPCs[s]; ok {
+		return s
+	}
+	for id, NPC := range gameWorld.NPCs {
+		if strings.EqualFold(NPC.Name, s) {
+			return id
+		}
+	}
+	return ""
+}
+
+func handleTalk(conn net.Conn, rest string) {
+	p := authPlayer(conn)
+	if p == nil {
+		return
+	}
+	loc, ok := gameWorld.Locations[p.room]
+	if !ok {
+		mu.Unlock()
+		fmt.Fprintf(conn, "ERR 901 SEND_FAILED\n")
+		return
+	}
+	id := resolveNPC(rest)
+	if id == "" {
+		mu.Unlock()
+		fmt.Fprintf(conn, "ERR 404 NPC_NOT_FOUND\n")
+		return
+	}
+	found := false
+	for _, n := range loc.NPCs {
+		if n == id {
+			found = true
+			break
+		}
+	}
+	if !found {
+		mu.Unlock()
+		fmt.Fprintf(conn, "ERR 404 NPC_NOT_FOUND\n")
+		return
+	}
+	npc := gameWorld.NPCs[id]
+	if len(npc.Dialogue) == 0 {
+		mu.Unlock()
+		fmt.Fprintf(conn, "ERR 405 NPC_NOT_TALKATIVE\n")
+		return
+	}
+	mu.Unlock()
+	d, _ := json.Marshal(npc.Dialogue[0])
+	fmt.Fprintf(conn, `OK {"npc":"%s","dialogue":%s}`+"\n", id, d)
+}
+
+
+func handleAttack(conn net.Conn, rest string) {
+	
+}
+
 func handleStatus(conn net.Conn, rest string)    { fmt.Fprintf(conn, "ERR: not implemented\n") }
 func handleQuest(conn net.Conn, rest string)     { fmt.Fprintf(conn, "ERR: not implemented\n") }
 func handleQuests(conn net.Conn, rest string)    { fmt.Fprintf(conn, "ERR: not implemented\n") }

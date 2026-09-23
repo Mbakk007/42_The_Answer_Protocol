@@ -26,6 +26,7 @@ type NPC struct {
 	Role		string		`json:"role"`
 	Dialogue	[]string	`json:"dialogue"`
 	HP			int			`json:"hp"`
+	CurrentHP	int			`json:"-"`
 	Damage		int			`json:"damage"`
 	Drops		[]string	`json:"drops"`
 	Quests		[]string	`json:"quests"`
@@ -68,6 +69,9 @@ func Load(path string) (*World, error) {
 		if loc.NPCs == nil {
 			loc.NPCs = []string{}
 		}
+	}
+	for _, npc := range w.NPCs {
+		npc.CurrentHP = npc.HP
 	}
 
 	return &w, nil

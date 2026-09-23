@@ -17,6 +17,7 @@ type player struct {
 	name string // "" until CONNECT
 	room string // current location id
 	hp   int
+	inventory []string
 }
 
 var (
@@ -97,11 +98,22 @@ func handleConn(conn net.Conn) {
 // TODO: subject requires "broadcasts without interruption if a client disconnects mid-send".
 // need to implement a queue
 func broadcast(msg string) {
-	// broadcast msgs to other clients
+	// broadcast msgs to other clients (all rooms)
 	mu.Lock()
 	defer mu.Unlock()
 	log.Printf("broadcast %q to %d clients", msg, len(clients))
 	for c := range clients {
 		fmt.Fprintf(c, "%s\n", msg)
+	}
+}
+
+func broadcastRoom(roomID string, msg string) {
+	// broadcast msgs to a specific room
+	mu.Lock()
+	defer mu.Unlock()
+	for c, p := range clients {
+		if p.room == roomID {
+			fmt.Fprintf(c, "%s\n", msg)
+		}
 	}
 }

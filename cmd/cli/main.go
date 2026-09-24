@@ -22,7 +22,6 @@ func main() {
 
 	go readLoop(conn) // server messages arrive independently of user input
 
-	// forward each typed line to the server
 	in := bufio.NewScanner(os.Stdin)
 	if err := in.Err(); err != nil {
 		log.Printf("input error: %v", err)
@@ -32,7 +31,6 @@ func main() {
 	}
 }
 
-// readLoop prints everything the server sends until the connection closes.
 func readLoop(conn net.Conn) {
 	sc := bufio.NewScanner(conn)
 	if err := sc.Err(); err != nil {

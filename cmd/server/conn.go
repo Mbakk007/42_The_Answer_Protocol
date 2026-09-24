@@ -18,6 +18,9 @@ type player struct {
 	room string // current location id
 	hp   int
 	inventory []string
+	group string
+	activeQuests    []string
+	completedQuests []string
 }
 
 var (
@@ -113,6 +116,20 @@ func broadcastRoom(roomID string, msg string) {
 	defer mu.Unlock()
 	for c, p := range clients {
 		if p.room == roomID {
+			fmt.Fprintf(c, "%s\n", msg)
+		}
+	}
+}
+
+func broadcastGroup(groupID string, msg string) {
+	// broadcast msgs to a specific group
+	if groupID == "" {
+		return
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	for c, p := range clients {
+		if p.group == groupID {
 			fmt.Fprintf(c, "%s\n", msg)
 		}
 	}

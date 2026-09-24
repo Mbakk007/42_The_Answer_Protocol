@@ -1,10 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
-	"encoding/json"
 )
 
 func handleConnect(conn net.Conn, rest string) {
@@ -158,7 +158,6 @@ func resolveItem(s string) string {
 	return ""
 }
 
-
 func handleTake(conn net.Conn, rest string) {
 	p := authPlayer(conn)
 	if p == nil {
@@ -198,7 +197,6 @@ func handleTake(conn net.Conn, rest string) {
 	mu.Unlock()
 	fmt.Fprintf(conn, "OK taken=%s\n", id)
 }
-
 
 func handleDrop(conn net.Conn, rest string) {
 	p := authPlayer(conn)
@@ -249,7 +247,6 @@ func handleInventory(conn net.Conn, rest string) {
 	fmt.Fprintf(conn, "OK %s\n", b)
 }
 
-
 // helper func to check if player is authenticated (used CONNECT cmd)
 func authPlayer(conn net.Conn) *player {
 	mu.Lock()
@@ -261,7 +258,6 @@ func authPlayer(conn net.Conn) *player {
 	}
 	return p
 }
-
 
 func resolveNPC(s string) string {
 	if _, ok := gameWorld.NPCs[s]; ok {
@@ -313,7 +309,6 @@ func handleTalk(conn net.Conn, rest string) {
 	mu.Unlock()
 	fmt.Fprintf(conn, "OK %s\n", npc.Dialogue[0])
 }
-
 
 func handleAttack(conn net.Conn, rest string) {
 	p := authPlayer(conn)
@@ -409,7 +404,6 @@ func handleAttack(conn net.Conn, rest string) {
 		broadcastRoom(respawnRoom, "EVT ROOM PRESENCE ENTER "+name)
 	}
 }
-
 
 func handleStatus(conn net.Conn, rest string) {
 	p := authPlayer(conn)

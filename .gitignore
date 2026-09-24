@@ -1,0 +1,12 @@
+bin/
+binaries/
+
+server
+cli
+gui
+
+*.exe
+*.test
+*.out
+
+.DS_Store

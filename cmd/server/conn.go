@@ -14,11 +14,11 @@ import (
 // TODO: move player + clients + mu into internal/game
 
 type player struct {
-	name string // "" until CONNECT
-	room string // current location id
-	hp   int
-	inventory []string
-	group string
+	name            string // "" until CONNECT
+	room            string // current location id
+	hp              int
+	inventory       []string
+	group           string
 	activeQuests    []string
 	completedQuests []string
 }

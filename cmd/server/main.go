@@ -4,11 +4,11 @@ import (
 	"log"
 	"net"
 
-	"tap/internal/world"
+	"tap/world"
 )
 
 func main() {
-	w, err := world.Load("data/world.json") // load world data
+	w, err := world.Load("world/world.json") // load world data
 	if err != nil {
 		log.Fatal(err) // no world file
 	}

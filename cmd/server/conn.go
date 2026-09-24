@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"tap/internal/world"
+	"tap/world"
 )
 
 // TODO: move player + clients + mu into internal/game

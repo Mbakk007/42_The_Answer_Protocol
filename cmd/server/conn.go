@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 	"sync"
@@ -17,8 +16,8 @@ type player struct {
 	name            string // "" until CONNECT
 	room            string // current location id
 	hp              int
+	group           string // "" when not in a group
 	inventory       []string
-	group           string
 	activeQuests    []string
 	completedQuests []string
 }
@@ -29,16 +28,20 @@ var (
 	gameWorld *world.World
 )
 
-func handleConn(conn net.Conn) {
+func handleConn(raw net.Conn) {
+	conn := newLoggedConn(raw) // every outbound line is logged
 	// defer executes when function returns
-	defer conn.Close()                             // release socket when client is done
-	log.Printf("connected: %s", conn.RemoteAddr()) // print clients ip and port
+	defer conn.Close() // release socket when client is done
+	addr := conn.RemoteAddr().String()
+	logger.Info("client connected", "addr", addr)
 
 	mu.Lock()
-	clients[conn] = &player{room: "loc.frostmere_gate", hp: 100} // TODO: starting room still hardcoded fix later
+	clients[conn] = &player{room: "loc.frostmere_gate", hp: 100} // TODO: starting room hardcoded
 	mu.Unlock()
 
 	fmt.Fprintf(conn, "OK hello proto=1\n") // RFC 3.2
+
+	var flood floodWindow
 
 	sc := bufio.NewScanner(conn)
 	for sc.Scan() {
@@ -51,6 +54,18 @@ func handleConn(conn net.Conn) {
 		rest := ""
 		if len(parts) > 1 {
 			rest = parts[1]
+		}
+
+		mu.Lock()
+		pname := ""
+		if p := clients[conn]; p != nil {
+			pname = p.name
+		}
+		mu.Unlock()
+
+		logger.Info("command", "addr", addr, "player", pname, "verb", verb, "args", rest)
+		if flood.hit() {
+			logger.Warn("command flooding", "addr", addr, "player", pname)
 		}
 
 		switch verb {
@@ -89,22 +104,25 @@ func handleConn(conn net.Conn) {
 		}
 	}
 	if err := sc.Err(); err != nil {
-		log.Printf("scan error: %v", err)
+		logger.Error("scan error", "addr", addr, "err", err.Error())
 	}
 
 	mu.Lock()
+	name := ""
+	if p := clients[conn]; p != nil {
+		name = p.name
+	}
 	delete(clients, conn)
 	mu.Unlock()
-	log.Printf("disconnected: %s", conn.RemoteAddr())
+	logger.Info("client disconnected", "addr", addr, "player", name)
 }
 
 // TODO: subject requires "broadcasts without interruption if a client disconnects mid-send".
 // need to implement a queue
 func broadcast(msg string) {
-	// broadcast msgs to other clients (all rooms)
+	// broadcast msgs to other clients
 	mu.Lock()
 	defer mu.Unlock()
-	log.Printf("broadcast %q to %d clients", msg, len(clients))
 	for c := range clients {
 		fmt.Fprintf(c, "%s\n", msg)
 	}
@@ -124,7 +142,7 @@ func broadcastRoom(roomID string, msg string) {
 func broadcastGroup(groupID string, msg string) {
 	// broadcast msgs to a specific group
 	if groupID == "" {
-		return
+		return // "" means no group; would hit every ungrouped player
 	}
 	mu.Lock()
 	defer mu.Unlock()

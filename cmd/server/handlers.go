@@ -18,6 +18,11 @@ func handleConnect(conn net.Conn, rest string) {
 		mu.Unlock()
 		return
 	}
+	if p.name != "" {
+		mu.Unlock()
+		fmt.Fprintf(conn, "ERR 402 ALREADY_CONNECTED\n")
+		return
+	}
 	for _, other := range clients {
 		if other.name == rest {
 			mu.Unlock()

@@ -1,4 +1,4 @@
-.PHONY: all deps build server cli gui lint test clean
+.PHONY: all deps build run-server run-client run-client-gui lint test clean
 
 BIN = binaries
 
@@ -13,13 +13,13 @@ build:
 	go build -o $(BIN)/cli    ./cmd/cli
 	go build -o $(BIN)/gui    ./cmd/gui
 
-server:
+run-server:
 	go run ./cmd/server
 
-cli:
+run-client:
 	go run ./cmd/cli
 
-gui:
+run-client-gui:
 	go run ./cmd/gui
 
 lint:

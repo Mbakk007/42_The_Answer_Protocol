@@ -6,6 +6,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	"tap/world"
 )
@@ -115,38 +116,41 @@ func handleConn(raw net.Conn) {
 	logger.Info("client disconnected", "addr", addr, "player", name)
 }
 
-// TODO: subject requires "broadcasts without interruption if a client disconnects mid-send".
-// need to implement a queue
+func broadcastWrite(c net.Conn, msg string) {
+	c.SetWriteDeadline(time.Now().Add(100 * time.Millisecond))
+	if _, err := fmt.Fprintf(c, "%s\n", msg); err != nil {
+		logger.Warn("broadcast write failed", "addr", c.RemoteAddr().String(), "err", err.Error())
+	}
+	c.SetWriteDeadline(time.Time{}) // clear, so normal replies are not affected
+}
+
 func broadcast(msg string) {
-	// broadcast msgs to other clients
 	mu.Lock()
 	defer mu.Unlock()
 	for c := range clients {
-		fmt.Fprintf(c, "%s\n", msg)
+		broadcastWrite(c, msg)
 	}
 }
 
 func broadcastRoom(roomID string, msg string) {
-	// broadcast msgs to a specific room
 	mu.Lock()
 	defer mu.Unlock()
 	for c, p := range clients {
 		if p.room == roomID {
-			fmt.Fprintf(c, "%s\n", msg)
+			broadcastWrite(c, msg)
 		}
 	}
 }
 
 func broadcastGroup(groupID string, msg string) {
-	// broadcast msgs to a specific group
 	if groupID == "" {
-		return // "" means no group; would hit every ungrouped player
+		return
 	}
 	mu.Lock()
 	defer mu.Unlock()
 	for c, p := range clients {
 		if p.group == groupID {
-			fmt.Fprintf(c, "%s\n", msg)
+			broadcastWrite(c, msg)
 		}
 	}
 }

@@ -1,4 +1,5 @@
 {
+  "start": "loc.frostmere_gate",
   "locations": {
     "loc.frostmere_gate": {
       "name": "Frostmere Gate",

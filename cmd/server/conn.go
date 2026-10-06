@@ -10,8 +10,6 @@ import (
 	"tap/world"
 )
 
-// TODO: move player + clients + mu into internal/game
-
 type player struct {
 	name            string // "" until CONNECT
 	room            string // current location id
@@ -36,7 +34,7 @@ func handleConn(raw net.Conn) {
 	logger.Info("client connected", "addr", addr)
 
 	mu.Lock()
-	clients[conn] = &player{room: "loc.frostmere_gate", hp: 100} // TODO: starting room hardcoded
+	clients[conn] = &player{room: gameWorld.Start, hp: 100}
 	mu.Unlock()
 
 	fmt.Fprintf(conn, "OK hello proto=1\n") // RFC 3.2

@@ -380,7 +380,7 @@ func handleAttack(conn net.Conn, rest string) {
 		if p.hp <= 0 {
 			playerDied = true
 			p.hp = 50
-			p.room = "loc.frostmere_gate"
+			p.room = gameWorld.Start
 		}
 	}
 

@@ -45,6 +45,7 @@ type Quest struct {
 }
 
 type World struct {
+	Start     string               `json:"start"`
 	Locations map[string]*Location `json:"locations"`
 	Items     map[string]*Item     `json:"items"`
 	NPCs      map[string]*NPC      `json:"npcs"`
@@ -134,6 +135,11 @@ func (w *World) Validate() error {
 		}
 	}
 
+	if w.Start == "" {
+		problems = append(problems, "no start room defined")
+	} else if _, ok := w.Locations[w.Start]; !ok {
+		problems = append(problems, fmt.Sprintf("unknown start room %s", w.Start))
+	}
 	if len(problems) > 0 {
 		return fmt.Errorf("invalid world:\n%s", strings.Join(problems, "\n"))
 	}

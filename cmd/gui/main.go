@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"log"
 	"net"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"tap/world"
@@ -21,6 +23,15 @@ type lookReply struct {
 	Players []string       `json:"players"`
 	Items   []string       `json:"items"`
 	NPCs    []string       `json:"npcs"`
+}
+
+type transcriptTheme struct{ fyne.Theme }
+
+func (t transcriptTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	if name == theme.ColorNameDisabled {
+		name = theme.ColorNameForeground
+	}
+	return t.Theme.Color(name, variant)
 }
 
 func main() {
@@ -61,11 +72,12 @@ func main() {
 		b.Disable()
 	}
 
+	readable := transcriptTheme{a.Settings().Theme()}
 	tabs := container.NewAppTabs(
-		container.NewTabItem("Global", global),
-		container.NewTabItem("Room", room),
-		container.NewTabItem("Group", group),
-		container.NewTabItem("Log", logv),
+		container.NewTabItem("Global", container.NewThemeOverride(global, readable)),
+		container.NewTabItem("Room", container.NewThemeOverride(room, readable)),
+		container.NewTabItem("Group", container.NewThemeOverride(group, readable)),
+		container.NewTabItem("Log", container.NewThemeOverride(logv, readable)),
 	)
 
 	roomName := widget.NewLabel("")
